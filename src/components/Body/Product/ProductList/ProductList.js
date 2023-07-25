@@ -14,7 +14,7 @@ function ProductList({title}) {
             <Row gutter={[16, 24]}>
                 <Col className="gutter-row" span={6}>
                     <div className={styles.card}>
-                        <Link to={'details/dasda'}>
+                        <Link to={'/details/dasda'}>
                             <Card
                                 hoverable
                                 style={{width: 240}}

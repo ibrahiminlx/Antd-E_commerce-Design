@@ -1,11 +1,10 @@
-import React, {useState} from 'react';
-import {Button, Checkbox, Col, Form, Image, Input, Row, Select,} from 'antd';
+import React from 'react';
+import {Button, Cascader, Checkbox, Col, Form, Image, Input, Row, Select,} from 'antd';
 import {Link} from "react-router-dom";
 import {phoneCode} from '../../Data/PhoneCode'
-import {City} from '../../Data/City'
-import {District} from '../../Data/District'
-import {Neighborhood} from '../../Data/Neighborhood'
+import ReCAPTCHA from "react-google-recaptcha";
 
+import turkey from '../../Data/All.json'
 const {Option} = Select;
 
 
@@ -28,7 +27,7 @@ const formItemLayout = {
     },
 };
 const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
+    <Form.Item name="phoneCode" noStyle>
         <Select
             showSearch
             optionFilterProp="children"
@@ -38,13 +37,15 @@ const prefixSelector = (
             filterOption={(input, option) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
             }
-            options={phoneCode.map((data) => (
+            options={phoneCode.map((data) =>
+                (
                 {
-                    value: data.code,
+                    value: data.dial_code,
                     label: data.dial_code,
 
                 }
-            ))}
+            )
+            )}
 
         >
         </Select>
@@ -65,26 +66,25 @@ const tailFormItemLayout = {
 
 function SignUp(props) {
     const [form] = Form.useForm();
-    const [cityKey, setCityKey] = useState(0)
-    const [districtKey, setDistrictKey] = useState(0)
-    const [districtDisable, setDistrictDisable] = useState(true)
-    const [streedDisable, setStreedDisable] = useState(true)
 
-    const handleClickCity = (event) => {
-        console.log('test', event)
-        setCityKey(event)
-        setDistrictDisable(false)
+    const recaptchaRef = React.useRef();
 
-    }
-    const handleClickDistrict = (event) => {
-        console.log('dk',event)
-        setDistrictKey(event)
-        setStreedDisable(false)
-    }
+    const residences = turkey.map(data=>({value:data.name,label:data.name,
+        children:data.towns.map(data2=>({value:data2.name,label:data2.name,
+        children:data2.districts.map(data3=>({value:data3.name,label:data3.name,children:data3.quarters.map(data4=>({value:data4.name,label:data4.name}))
+            }))}))}))
 
 
-    const onFinish = (values) => {
+
+    const onFinish = async (values) => {
+        // const token = await recaptchaRef.current.executeAsync();
+        // const secretkey='6LeWO1EnAAAAAOduGAoYeO-JgP9wCJcdrxUeiYNT'
+        // console.log('token',token,secretkey)
+
+        // recaptchaRef.current.reset();
+
         console.log('Received values of form: ', values);
+
     };
 
     return (
@@ -106,6 +106,31 @@ function SignUp(props) {
                             }}
                             scrollToFirstError
                         >
+
+                            <Form.Item
+                                name="name"
+                                label="Name"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Please input your Name!',
+                                    },
+                                ]}
+                            >
+                                <Input/>
+                            </Form.Item>
+                            <Form.Item
+                                name="surname"
+                                label="Surname"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Please input your surname!',
+                                    },
+                                ]}
+                            >
+                                <Input/>
+                            </Form.Item>
                             <Form.Item
                                 name="email"
                                 label="E-mail"
@@ -177,82 +202,16 @@ function SignUp(props) {
                                     }}
                                 />
                             </Form.Item>
-
-
                             <Form.Item
-                                name="city"
-                                label="City"
+                                name="address"
+                                label="Address"
                                 rules={[
-                                    {
-                                        required: true,
-                                        message: 'Please input your phone City!',
-                                    },
+                                    { type: 'array', required: true, message: 'Please select your habitual address!' },
                                 ]}
                             >
-                                <Select
-                                    showSearch
-                                    onChange={handleClickCity}
-                                    placeholder="Select a city"
-                                    optionFilterProp="children"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
-                                    options={City.map(data => ({value: data.sehir_key, label: data.sehir_title}))}
-                                />
+                                <Cascader options={residences} />
                             </Form.Item>
-                            <Form.Item
-                                name="district"
-                                label="District"
 
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Please input your phone District!',
-                                    },
-                                ]}
-                            >
-                                <Select
-                                    showSearch
-                                    onChange={handleClickDistrict}
-                                    disabled={districtDisable}
-                                    placeholder="Select a district"
-                                    optionFilterProp="children"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
-
-                                    options={District.filter((data) => data.ilce_sehirkey === cityKey).map((data) => ({
-                                        value: data.ilce_key,
-                                        label: data.ilce_title
-                                    }))}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="neighborhood"
-                                label="Neighborhood"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Select a Neighborhood',
-                                    },
-                                ]}
-                            >
-                                <Select
-                                    showSearch
-                                    onChange={handleClickDistrict}
-                                    disabled={streedDisable}
-                                    placeholder="Select a Neighborhood"
-                                    optionFilterProp="children"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
-
-                                    options={Neighborhood.filter((data) => data.mahalle_ilcekey === districtKey).map((data2) => ({
-                                        value: data2.mahalle_title,
-                                        label: data2.mahalle_title
-                                    }))}
-                                />
-                            </Form.Item>
 
 
                             <Form.Item
@@ -285,27 +244,11 @@ function SignUp(props) {
                                 </Select>
                             </Form.Item>
 
-                            <Form.Item label="Captcha" extra="We must make sure that your are a human.">
-                                <Row gutter={8}>
-                                    <Col span={12}>
-                                        <Form.Item
-                                            name="captcha"
-                                            noStyle
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: 'Please input the captcha you got!',
-                                                },
-                                            ]}
-                                        >
-                                            <Input/>
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={12}>
-                                        <Button>Get captcha</Button>
-                                    </Col>
-                                </Row>
-                            </Form.Item>
+                            <ReCAPTCHA
+                                ref={recaptchaRef}
+                                size="invisible"
+                                sitekey="6LeWO1EnAAAAAAjeoohLsHDYqQtZB9466BCObKc_"
+                            />
 
                             <Form.Item
                                 name="agreement"
