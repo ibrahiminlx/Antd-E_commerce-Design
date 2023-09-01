@@ -247,7 +247,7 @@ function Basket(props) {
                                         <Title level={5}><b>Delivery</b></Title>
                                     </Col>
                                     <Col span={6}>
-                                        <Text type="secondary" style={{position:"absolute"}}>$14.99</Text>
+                                        <Text type="secondary" style={{position:"absolute"}}>$14.98</Text>
                                     </Col>
                                 </Row>
                             </div>
